@@ -2,7 +2,7 @@
 
 > 智慧運算碩士學位學程 NN6124030 施宇庭
 
-## Q1
+## Q1 Convolution
 
 假設 convolution 的 input feature map、output feature map 及 filter 的尺寸如下：
 
@@ -74,50 +74,42 @@ $$
 | `Conv 3x3x1` + `Conv 3x3x1` | $18$ | $15156$ |
 
 
-## Q2
+## Q2 Model Architecture Visualization
 <!-- Netron 視覺化並截圖 -->
 
 ### Fashion MNIST
 
-![](./fmnist-onnx.png)
+![](./mnist_model.png)
 
 ### CIFAR10
 
-## Q3
+## Q3 Training and Validation Losses
 <!-- 畫出 train/validation loss，是否 overfit -->
 
 ### Fashion MNIST
 
-![](./fmnist-squeezenet.png)
+![](./mnist_result.png)
 
 ### CIFAR10
 
+![](./cifar10_result_basic.png)
+![](./cifar10_result_augment.png)
 
-
-## Q4
+## Q4  心得
 <!-- 心得 -->
 
 ## Q5
 <!-- 實作上做了什麼調整 (learning rate, image augmentation) 來維持準確度、減少參數及運算量、提高吞吐量、避免 overfitting？加上不同的 data augmentation 對 accuracy 有什麼影響？以具體的文字搭配數據描述 -->
 
-### Model Architecture
+### Q5-1 Training Optimization
+
+### Q5-2 Data Augmenetation
+
+
 
 選用 PyTorch 框架中有提供的模型架構，挑選參數量最小的，但要怎麼測量參數量與 MAC 數？
 
 計算參數量：
-
-```python
-from torchsummary import summary
-summary(net)
-```
-
-計算 MAC 數
-
-```
-from thop import profile
-input1 = torch.randn(1, 3, 3, 32).cuda()
-MACs, params = profile()
-```
 
 
 ```
@@ -132,3 +124,18 @@ Params size (MB): 1.34
 Estimated Total Size (MB): 1.81
 ----------------------------------------------------------------
 ```
+
+|   | Params | MACs | Test accuracy |
+| - | - | - | - |
+| Fashion MNIST | 0.390634 M | 0.007924224 G |  |
+| CIFAR10       | 0.620586 M | 0.011078144 G | 0.8088 |
+
+### Fashion MNIST
+
+使用了
+learning rate = 0.001
+batch size = 512
+
+baseline 使用 SGD optimizer
+baseline 使用 ADAM optimizer
+baseline 使用 SGD optimizer + data augmentation

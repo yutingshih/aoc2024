@@ -1,2 +1,13 @@
 .DS_Store
 *.zip
+data/
+tmp/
+
+# LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.run.xml
+*.synctex.gz

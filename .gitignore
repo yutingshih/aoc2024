@@ -1,6 +1,9 @@
 .DS_Store
 *.zip
 data/
+tmp/
+build/
+log.txt
 
 # LaTeX
 *.aux

@@ -5,6 +5,10 @@ tmp/
 build/
 log.txt
 
+# EDA tool artifacts
+build/
+log.txt
+
 # LaTeX
 *.aux
 *.bbl

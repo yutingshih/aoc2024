@@ -3,6 +3,10 @@
 data/
 tmp/
 
+# EDA tool artifacts
+build/
+log.txt
+
 # LaTeX
 *.aux
 *.bbl

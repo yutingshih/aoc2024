@@ -1,15 +1,15 @@
 `timescale 1ns/10ps
 `define CYCLE 10.0
 `include "PE.sv"  // change to "PE.v" , if you implent by verilog
-`define PATH "/home/.../Lab4_PE/"  //change to your own path
-`define MAX 100 // adjust the cycle you need 
+`define PATH ".."  //change to your own path
+`define MAX 1000000 // adjust the cycle you need
 `include "def.svh"
 // PE tb final version
 
 module PE_tb;
 	logic clk;
 	logic rst;
-	//Layer setting 
+	//Layer setting
 	logic set_info;
 	logic [2:0] Ch_size;
 	logic [5:0] ifmap_column;
@@ -20,19 +20,19 @@ module PE_tb;
 	logic [3:0] filter_Quant_size;
 	//data to PE.sv
 	logic filter_enable;
-	logic [7:0] filter;		
+	logic [7:0] filter;
 	logic ifmap_enable;
 	logic [31:0] ifmap;
 	logic ipsum_enable;
-	logic [`Psum_BITS-1:0] ipsum; 
-	logic opsum_ready;	
+	logic [`Psum_BITS-1:0] ipsum;
+	logic opsum_ready;
 	//data from PE.sv
 	logic filter_ready;
-	logic ifmap_ready;	
+	logic ifmap_ready;
 	logic ipsum_ready;
 	logic [`Psum_BITS-1:0] opsum;
-	logic opsum_enable;	
-	
+	logic opsum_enable;
+
 	// record clock cycle
 	longint counter;
 	always_ff @(posedge clk or posedge rst) begin
@@ -43,7 +43,7 @@ module PE_tb;
 		// display old value
 		//$display("At time %t, counter value is %d", $time, counter);
 	end
-	
+
 	//After set_info, you can start request data
 	PE PE0(
 		.clk(clk),
@@ -57,7 +57,7 @@ module PE_tb;
 		.filter_Quant_size(filter_Quant_size),
 		//data to PE.sv
 		.filter_enable(filter_enable),
-		.filter(filter),		
+		.filter(filter),
 		.ifmap_enable(ifmap_enable),
 		.ifmap(ifmap),
 		.ipsum_enable(ipsum_enable),
@@ -65,12 +65,12 @@ module PE_tb;
 		.opsum_ready(opsum_ready),
 		// data from PE.sv
 		.filter_ready(filter_ready),
-        .ifmap_ready(ifmap_ready),	
+        .ifmap_ready(ifmap_ready),
         .ipsum_ready(ipsum_ready),
-        .opsum(opsum), 
+        .opsum(opsum),
         .opsum_enable(opsum_enable)
 	);
-	
+
 	logic start;
 	always #(`CYCLE/2) clk = ~clk;
 	initial begin
@@ -78,7 +78,7 @@ module PE_tb;
 		rst = 0;
 		start = 1;
 		set_info = 1'd0;
-		//Layer setting 
+		//Layer setting
 		Ch_size = 3'd0;
 		ifmap_column = 6'd0;
 		ofmap_column = 6'd0;
@@ -90,34 +90,34 @@ module PE_tb;
 		rst = 1;
 		#(`CYCLE) rst = 0;
 		set_info = 1'd1;
-		//Layer setting 
-		Ch_size = `channel;	
-		ifmap_column = `ifmap_col;	
+		//Layer setting
+		Ch_size = `channel;
+		ifmap_column = `ifmap_col;
 		ofmap_column = `ofmap_col;
-		//batch_size = `batch_size; 
-		//processing_pass = `pro_pass;		
+		//batch_size = `batch_size;
+		//processing_pass = `pro_pass;
 		ifmap_Quant_size = `ifmap_bit;
 		filter_Quant_size = `filter_bit;
-		
+
 		#(`CYCLE) set_info = 1'd0;
-		//Layer setting 
+		//Layer setting
 		Ch_size = 3'd0;
 		ifmap_column = 6'd0;
 		ofmap_column = 6'd0;
 		ifmap_Quant_size = 3'd0;
 		filter_Quant_size = 3'd0;
 	end
-		
+
 	///////////////		Read In data	///////////////
 	/////	ifmap	/////
 	//path string
-	string full_path_ifmap_00,full_path_ifmap_10,full_path_ifmap_20,full_path_ifmap_21,full_path_ifmap_30;	
-	logic signed [7:0]ifmap_MEM[`batch_size-1:0][`ifmap_col-1:0][`channel-1:0]; 
+	string full_path_ifmap_00,full_path_ifmap_10,full_path_ifmap_20,full_path_ifmap_21,full_path_ifmap_30;
+	logic signed [7:0]ifmap_MEM[`batch_size-1:0][`ifmap_col-1:0][`channel-1:0];
 	//tb0 : 1 Batch_Size * 5 Ifmap_Column * 4 Channel
 	integer i2,i1,i0;
 	integer ifmap_read1,ifmap_read0;
-	integer i_read1,i_read0;	
-	
+	integer i_read1,i_read0;
+
 	initial begin
 		i1=0;
 		i0=0;
@@ -127,26 +127,26 @@ module PE_tb;
 		$sformat(full_path_ifmap_20, "%s%s", `PATH, "/tb2_data/ifmap0.txt");
 		$sformat(full_path_ifmap_21, "%s%s", `PATH, "/tb2_data/ifmap1.txt");
 		$sformat(full_path_ifmap_30, "%s%s", `PATH, "/tb3_data/ifmap0.txt");
-		
+
 		//read files
 		`ifdef tb0
 			ifmap_read0 = $fopen(full_path_ifmap_00,"r");
-		`endif 
+		`endif
 		`ifdef tb1
 			ifmap_read0 = $fopen(full_path_ifmap_10,"r");
 		`endif
-		`ifdef tb2 // batch_size 2 
+		`ifdef tb2 // batch_size 2
 			ifmap_read0 = $fopen(full_path_ifmap_20,"r");
 			ifmap_read1 = $fopen(full_path_ifmap_21,"r");
 		`endif
 		`ifdef tb3
 			ifmap_read0 = $fopen(full_path_ifmap_30,"r");
 		`endif
-		 
-		
+
+
 		while(!$feof(ifmap_read0))begin
-			//tb2 : batch size 2, other 1 
-			`ifdef tb2 // batch_size 2 
+			//tb2 : batch size 2, other 1
+			`ifdef tb2 // batch_size 2
 				i_read0 = $fscanf(ifmap_read0,"%d",ifmap_MEM[0][i1][i0]);
 				i_read1 = $fscanf(ifmap_read1,"%d",ifmap_MEM[1][i1][i0]);
 			`else
@@ -158,9 +158,9 @@ module PE_tb;
 			end else begin
 				i0 = i0 + 1;
 				i1 = i1;
-			end 
+			end
 			if(i0 == 0 && i1 == `ifmap_col)
-				break; 
+				break;
 		end
 		$fclose(ifmap_read0);
 		$fclose(ifmap_read1);
@@ -169,21 +169,21 @@ module PE_tb;
 				for(int z=0;z<`channel;z++) begin
 					$display("ifmap_MEM[%2d][%2d][%2d]:%d",x,y,z,ifmap_MEM[x][y][z]);
 				end
-			end 
+			end
 		end   */
-	end 
-	
-	
-	
+	end
+
+
+
 	/////	filter	/////
 	//path string
 	string full_path_filter_0,full_path_filter_1,full_path_filter_2,full_path_filter_3;
-	logic signed [7:0]filter_MEM[`kernel-1:0][`filter_col-1:0][`channel-1:0]; 
+	logic signed [7:0]filter_MEM[`kernel-1:0][`filter_col-1:0][`channel-1:0];
 	//tb0 : 16 Kernel * 3 Sliding_Window * 4 Channel
 	integer f2,f1,f0;
 	integer filter_read;
 	integer f_read;
-	
+
 	initial begin
 		f2=0;
 		f1=0;
@@ -207,7 +207,7 @@ module PE_tb;
 		`ifdef tb3
 			filter_read  = $fopen(full_path_filter_3,"r");
 		`endif
-				
+
 		while(!$feof(filter_read))begin
 			f_read = $fscanf(filter_read,"%d",filter_MEM[f2][f1][f0]);
 			if(f0 == (`channel-1)) begin
@@ -218,7 +218,7 @@ module PE_tb;
 				end else begin
 					f1 = f1 + 1;
 					f2 = f2;
-				end 
+				end
 			end else begin
 				f2 = f2;
 				f1 = f1;
@@ -228,30 +228,30 @@ module PE_tb;
 				break;
 		end
 		$fclose(filter_read);
-	end 
-	
+	end
+
 	/////	input Psum	/////
 	//path string
 	string full_path_ipsum_00,full_path_ipsum_10,full_path_ipsum_20,full_path_ipsum_21,full_path_ipsum_30;
-	logic signed [`Psum_BITS-1:0]ipsum_MEM[`batch_size-1:0][`kernel-1:0][`ofmap_col-1:0]; 
-	//tb0 : 1 Batch_Size * 16 Channel * 3 Ofmap_Column 
+	logic signed [`Psum_BITS-1:0]ipsum_MEM[`batch_size-1:0][`kernel-1:0][`ofmap_col-1:0];
+	//tb0 : 1 Batch_Size * 16 Channel * 3 Ofmap_Column
 	integer p2,p1,p0;
 	integer ipsum_read1,ipsum_read0;
 	integer p_read1,p_read0;
-	
+
 	initial begin
 		p1=0;
 		p0=0;
 		p_read0=0;
 		p_read1=0;
-		
+
 		//define path
 		$sformat(full_path_ipsum_00, "%s%s", `PATH, "/tb0_data/ipsum0.txt");
 		$sformat(full_path_ipsum_10, "%s%s", `PATH, "/tb1_data/ipsum0.txt");
 		$sformat(full_path_ipsum_20, "%s%s", `PATH, "/tb2_data/ipsum0.txt");
 		$sformat(full_path_ipsum_21, "%s%s", `PATH, "/tb2_data/ipsum1.txt");
 		$sformat(full_path_ipsum_30, "%s%s", `PATH, "/tb3_data/ipsum0.txt");
-		
+
 		//read files
 		`ifdef tb0
 			ipsum_read0 = $fopen(full_path_ipsum_00,"r");
@@ -259,17 +259,17 @@ module PE_tb;
 		`ifdef tb1
 			ipsum_read0 = $fopen(full_path_ipsum_10,"r");
 		`endif
-		`ifdef tb2 // batch_size 2 
+		`ifdef tb2 // batch_size 2
 			ipsum_read0 = $fopen(full_path_ipsum_20,"r");
 			ipsum_read1 = $fopen(full_path_ipsum_21,"r");
 		`endif
 		`ifdef tb3
 			ipsum_read0 = $fopen(full_path_ipsum_30,"r");
 		`endif
-		
-		
+
+
 		while(!$feof(ipsum_read0))begin
-			`ifdef tb2 // batch_size 2 
+			`ifdef tb2 // batch_size 2
 				p_read0 = $fscanf(ipsum_read0,"%d",ipsum_MEM[0][p1][p0]);
 				p_read1 = $fscanf(ipsum_read1,"%d",ipsum_MEM[1][p1][p0]);
 			`else
@@ -288,7 +288,7 @@ module PE_tb;
 		$fclose(ipsum_read0);
 		$fclose(ipsum_read1);
 	end
-	
+
 	/////	Answer	/////
 	`ifdef tb3 //hybrid
 		localparam golden_kernel = `kernel / 2;
@@ -298,12 +298,12 @@ module PE_tb;
 		localparam golden_column = `ofmap_col;
 	`endif
 	logic signed [`Psum_BITS-1:0] opsum_MEM[`batch_size-1:0][golden_kernel-1:0][golden_column-1:0];
-	//tb0 : 1 Batch_Size * 16 Channel * 3 Ofmap_Column 
+	//tb0 : 1 Batch_Size * 16 Channel * 3 Ofmap_Column
 	integer o2,o1,o0;
 	integer opsum_read;
 	integer o_read0;
 	string full_path_golden_0,full_path_golden_1,full_path_golden_2,full_path_golden_3;
-	
+
 	initial begin
 		o2=0;
 		o1=0;
@@ -314,7 +314,7 @@ module PE_tb;
 		$sformat(full_path_golden_1, "%s%s", `PATH, "/tb1_data/golden.txt");
 		$sformat(full_path_golden_2, "%s%s", `PATH, "/tb2_data/golden.txt");
 		$sformat(full_path_golden_3, "%s%s", `PATH, "/tb3_data/golden.txt");
-		
+
 		//read files
 		`ifdef tb0
 			opsum_read = $fopen(full_path_golden_0,"r");
@@ -328,8 +328,8 @@ module PE_tb;
 		`ifdef tb3
 			opsum_read = $fopen(full_path_golden_3,"r");
 		`endif
-		
-		//read data 
+
+		//read data
 		while(!$feof(opsum_read))begin
 			o_read0 = $fscanf(opsum_read,"%d",opsum_MEM[o2][o1][o0]);
 			if(o0 == (golden_column-1)) begin
@@ -340,25 +340,25 @@ module PE_tb;
 				end else begin
 					o1 = o1 + 1;
 					o2 = o2;
-				end 
+				end
 			end else begin
 				o2 = o2;
 				o1 = o1;
 				o0 = o0 + 1;
 			end
 			if(o0 == 0 && o1 == 0 && o2 == `batch_size)
-				break;	
-		end	
-		
+				break;
+		end
+
 		$fclose(opsum_read);
-		
+
 	end
-	 
+
 	///////////////		Send Out Data	///////////////
-	
+
 	///// 	ifmap 	/////
-	logic [5:0] ifmap_ptr2, ifmap_ptr1; 
-	logic i_done; 
+	logic [5:0] ifmap_ptr2, ifmap_ptr1;
+	logic i_done;
 	logic [9:0] i0_repeat, i1_repeat;
 	`ifdef tb3 //hybrid
 		localparam i_delivery_column = `ifmap_col/2 - 1;
@@ -368,32 +368,32 @@ module PE_tb;
 	logic ifmap_undone;
 	logic receiving_ifmap;
 	localparam repeat_time = `pro_pass*16 - 1 ;
-	
+
 	always_comb begin
 		`ifdef tb0
-			if(counter%10 == 3) begin 
+			if(counter%10 == 3) begin
 				receiving_ifmap = 1;
-		`elsif tb1 
-			if(counter%10 == 1 || counter%10 == 3 || counter%10 == 4 || counter%10 == 6 || counter%10 == 9) begin 
+		`elsif tb1
+			if(counter%10 == 1 || counter%10 == 3 || counter%10 == 4 || counter%10 == 6 || counter%10 == 9) begin
 				receiving_ifmap = 1;
 		`elsif tb2
-			if(counter%10 == 2) begin 
+			if(counter%10 == 2) begin
 				receiving_ifmap = 1;
-		`else 
-			if(counter%10 == 6) begin 
+		`else
+			if(counter%10 == 6) begin
 				receiving_ifmap = 1;
 		`endif
-		
+
 		end else begin
 			receiving_ifmap = 0;
-		end 
-		
-		ifmap_undone = rst || set_info || start || receiving_ifmap; 
-		ifmap_enable = (ifmap_ready && !ifmap_undone && !i_done); 
-	end 
+		end
+
+		ifmap_undone = rst || set_info || start || receiving_ifmap;
+		ifmap_enable = (ifmap_ready && !ifmap_undone && !i_done);
+	end
 
 	always_ff@(posedge rst or posedge clk) begin
-		if(rst) begin		
+		if(rst) begin
 			ifmap_ptr2 <= 6'd0;
 			ifmap_ptr1 <= 6'd1;
 			`ifdef tb3 //hybrid
@@ -401,12 +401,12 @@ module PE_tb;
 								 ifmap_MEM[0][1][1][3:0],ifmap_MEM[0][1][0][3:0]};
 				ifmap[15:0] <= {ifmap_MEM[0][0][3][3:0],ifmap_MEM[0][0][2][3:0],
 								ifmap_MEM[0][0][1][3:0],ifmap_MEM[0][0][0][3:0]};
-			`elsif tb1 // 3 channels 
+			`elsif tb1 // 3 channels
 				ifmap <= {8'd0,ifmap_MEM[0][0][2],ifmap_MEM[0][0][1],ifmap_MEM[0][0][0]};
-			`else 
+			`else
 				ifmap <= {ifmap_MEM[0][0][3],ifmap_MEM[0][0][2],ifmap_MEM[0][0][1],ifmap_MEM[0][0][0]};
 			`endif
-			i_done <= 1'd0; 
+			i_done <= 1'd0;
 			i0_repeat <= 10'd0;
 			i1_repeat <= 10'd0;
 			$display("*Ifmap Distribution Info* Time:%20d, Ifmap Buffer Coordinate [Batch Size][Column][Channel]"
@@ -440,7 +440,7 @@ module PE_tb;
 							  ifmap_MEM[ifmap_ptr2][ifmap_ptr1][1],
 							  ifmap_MEM[ifmap_ptr2][ifmap_ptr1][0]};
 				`endif
-				
+
 				if(ifmap_ptr2 == 6'd2) begin
 					ifmap_ptr1 <= ifmap_ptr1;
 					ifmap_ptr2 <= ifmap_ptr2;
@@ -457,19 +457,19 @@ module PE_tb;
 						$display("*Ifmap* Time:%20d, last ifmap:%5d%5d%5d%5d ",$time,
 						$signed(ifmap[31:24]),$signed(ifmap[23:16]),$signed(ifmap[15:8]),$signed(ifmap[7:0]));
 					`endif
-					end 
-					
+					end
+
 				end else begin
 					$display("*Ifmap Info* Time:%20d, i0_repeat:%d, i1_repeat:%d"
 							,$time,i0_repeat,i1_repeat);
 					i_done <= 1'd0;
 					if(ifmap_ptr1 == i_delivery_column) begin
-						`ifdef tb2 // batch_size 2 
+						`ifdef tb2 // batch_size 2
 							if(i0_repeat < 10'd15) begin
 								ifmap_ptr2 <= ifmap_ptr2;
 								i0_repeat  <= i0_repeat + 10'd1;
 								i1_repeat  <= i1_repeat;
-							end else if (i0_repeat == 10'd15 && ifmap_ptr2 == 6'd0)begin 
+							end else if (i0_repeat == 10'd15 && ifmap_ptr2 == 6'd0)begin
 								ifmap_ptr2 <= ifmap_ptr2 + 6'd1;
 								i0_repeat  <= i0_repeat;
 								i1_repeat  <= i1_repeat;
@@ -481,24 +481,24 @@ module PE_tb;
 								ifmap_ptr2 <= ifmap_ptr2 + 6'd1;
 								i0_repeat  <= i0_repeat;
 								i1_repeat  <= i1_repeat;
-							end  
+							end
 						`else
 							if(i0_repeat < repeat_time) begin
 								ifmap_ptr2 <= ifmap_ptr2;
 								i0_repeat  <= i0_repeat + 10'd1;
-							end else if (i0_repeat == repeat_time && ifmap_ptr2 == 6'd0)begin 
+							end else if (i0_repeat == repeat_time && ifmap_ptr2 == 6'd0)begin
 								ifmap_ptr2 <= ifmap_ptr2 + 6'd2;
-								i0_repeat  <= i0_repeat;	
-							end  
+								i0_repeat  <= i0_repeat;
+							end
 							i1_repeat  <= i1_repeat;
-						`endif 
+						`endif
 						ifmap_ptr1 <= 6'd0;
 					end else begin
 						ifmap_ptr2 <= ifmap_ptr2;
 						ifmap_ptr1 <= ifmap_ptr1+ 6'd1;
 						i0_repeat  <= i0_repeat;
 						i1_repeat  <= i1_repeat;
-					end 
+					end
 					`ifdef tb3 //hybrid
 						$display("*Ifmap* Time:%20d, ifmap[31:16] %3d%3d%3d%3d / [15:0] %3d%3d%3d%3d",$time,
 							$signed(ifmap[31:28]),$signed(ifmap[27:24]),$signed(ifmap[23:20]),$signed(ifmap[19:16]),
@@ -510,17 +510,17 @@ module PE_tb;
 							$signed(ifmap[31:24]),$signed(ifmap[23:16]),$signed(ifmap[15:8]),$signed(ifmap[7:0]),
 							ifmap_ptr2,ifmap_ptr1);
 					`endif
-				end 
-				
+				end
+
 			// ifmap no handshake
 			end	else begin
 				ifmap_ptr2 <= ifmap_ptr2;
 				ifmap_ptr1 <= ifmap_ptr1;
-			end	
-			
+			end
+
 		end
-	end 
-	
+	end
+
 	///// 	filter 	/////
 	logic [9:0] filter_ptr2, filter_ptr1, filter_ptr0;
 	logic f_done;
@@ -532,32 +532,32 @@ module PE_tb;
 	`endif
 	logic filter_undone;
 	logic receiving_filter;
-	
+
 	always_comb begin
 		`ifdef tb0
-			if(counter%10 == 9) begin 
+			if(counter%10 == 9) begin
 				receiving_filter = 1;
-		`elsif tb1 
-			if(counter%10 == 0 || counter%10 == 2 || counter%10 == 4 || counter%10 == 6 || counter%10 == 8) begin 
+		`elsif tb1
+			if(counter%10 == 0 || counter%10 == 2 || counter%10 == 4 || counter%10 == 6 || counter%10 == 8) begin
 				receiving_filter = 1;
 		`elsif tb2
-			if(counter%10 == 1) begin 
+			if(counter%10 == 1) begin
 				receiving_filter = 1;
-		`else 
-			if(counter%10 == 0) begin 
+		`else
+			if(counter%10 == 0) begin
 				receiving_filter = 1;
 		`endif
-		
+
 		end else begin
 			receiving_filter = 0;
-		end 
-		
+		end
+
 		filter_undone = rst || set_info || start || receiving_filter;
 		filter_enable = (filter_ready && !filter_undone && !f_done);
-	end 
-	
+	end
+
 	always_ff@(posedge rst or posedge clk) begin
-		if(rst) begin		
+		if(rst) begin
 			filter_ptr2 <= 10'd0;
 			filter_ptr1 <= 10'd0;
 			filter_ptr0 <= 10'd1;
@@ -566,14 +566,14 @@ module PE_tb;
 			$display("\n");
 			$display("*Filter Distribution Info* Time:%20d, Filter Buffer Coordinate [Kernel][Column][Channel]"
 						,$time);
-			// Assign filter value	
+			// Assign filter value
 			`ifdef tb3 // hybrid
 				filter[7:0]<= {filter_MEM[1][0][0][3:0],filter_MEM[0][0][0][3:0]};
 			`else
 				filter <= filter_MEM[0][0][0];
 			`endif
-			
-			//Filter Delivery Info	
+
+			//Filter Delivery Info
 			`ifdef tb3 // hybrid
 				$display("*Filter Distribution Info* Time:%20d, Enable:%d, Filter Buffer is preparing for[1,0][0][0]"
 							,$time,filter_enable);
@@ -583,7 +583,7 @@ module PE_tb;
 			`endif
 		end else begin
 		//$display("*parameter* Time:%20d, f_repeat:%d,filter_ptr2 %d,f_done",$time,f_repeat,filter_ptr2,f_done);
-		// f-done v.s. handshake	
+		// f-done v.s. handshake
 			if(filter_ready && !filter_undone) begin
 				///// Assign filter value
 				`ifdef tb3 // hybrid
@@ -592,7 +592,7 @@ module PE_tb;
 				`else
 					filter <=  filter_MEM[filter_ptr2][filter_ptr1][filter_ptr0];
 				`endif
-				
+
 				if(filter_ptr2 == f_delivery_kernel) begin /// a round of filter has sended out
 					//$display("*Filter send out a round* Time:%20d, f_repeat:%d",$time,f_repeat);
 					if(f_repeat == 2'd2) begin
@@ -610,19 +610,19 @@ module PE_tb;
 						f_done <= 1'd1;
 						f_repeat <= f_repeat + 2'd1;
 					end else begin
-						`ifdef tb3 // Hybrid 
+						`ifdef tb3 // Hybrid
 							$display("*Filter* Time:%20d, last filter:%3d%3d.",
 								$time,$signed(filter[7:4]),$signed(filter[3:0]));
-						`elsif tb2 // batch_size 2 
+						`elsif tb2 // batch_size 2
 							$display("*Filter* Time:%20d, filter:%5d.",$time,$signed(filter[7:0]));
 							$display("Buffer isn't available and needs to prepare for next filter in next cycle.");
-						`else 
+						`else
 							$display("*Filter* Time:%20d, last filter:%5d.",$time,$signed(filter[7:0]));
 						`endif
 						filter_ptr0 <= 10'd0;
 						filter_ptr1 <= 10'd0;
 						f_done   <= 1'd1;
-						`ifdef tb2 // batch_size 2 
+						`ifdef tb2 // batch_size 2
 							f_repeat <= f_repeat + 2'd1;
 							filter_ptr2 <= 10'd0;
 						`else
@@ -630,27 +630,27 @@ module PE_tb;
 							filter_ptr2 <= filter_ptr2;
 						`endif
 					end
-					
-				end else begin /// sendING out a round of filter 
+
+				end else begin /// sendING out a round of filter
 					//$display("*Filter Info* Time:%20d, f_repeat:%d",$time,f_repeat);
 					if(filter_ptr0 == `channel-1) begin
 						filter_ptr0 <= 10'd0;
-						if(filter_ptr1 == 10'd2) begin 
+						if(filter_ptr1 == 10'd2) begin
 							filter_ptr2 <= filter_ptr2 + 10'd1;
 							filter_ptr1 <= 10'd0;
 						end else begin
 							filter_ptr2 <= filter_ptr2;
 							filter_ptr1 <= filter_ptr1 + 10'd1;
-						end 
+						end
 					end else begin
 						filter_ptr2 <= filter_ptr2;
 						filter_ptr1 <= filter_ptr1;
 						filter_ptr0 <= filter_ptr0 + 10'd1;
-					end 
-					f_done <= 1'd0; // 
+					end
+					f_done <= 1'd0; //
 					f_repeat <= f_repeat;
-					
-					`ifdef tb3 // Hybrid 
+
+					`ifdef tb3 // Hybrid
 						$display("*Filter* Time:%20d, filter[7:4][3:0]:%3d%3d",$time,$signed(filter[7:4]),$signed(filter[3:0]));
 						$display("*Filter* Time:%20d, next filter Buffer[%2d,%2d][%2d][%2d]"
 							,$time,(2*filter_ptr2+1),(2*filter_ptr2),filter_ptr1,filter_ptr0);
@@ -658,18 +658,18 @@ module PE_tb;
 						$display("*Filter* Time:%20d, filter:%5d, next filter Buffer[%2d][%2d][%2d]"
 						,$time,$signed(filter[7:0]),filter_ptr2,filter_ptr1,filter_ptr0);
 					`endif
-				end 
-				
+				end
+
 			// filter no handshake
 			end	else begin
 				f_done <= f_done;
 				filter_ptr2 <= filter_ptr2;
 				filter_ptr1 <= filter_ptr1;
 				filter_ptr0 <= filter_ptr0;
-			end	
+			end
 		end
 	end
-	
+
 
 	logic [9:0] ipsum_ptr2, ipsum_ptr1, ipsum_ptr0;
 	logic ip_done;
@@ -680,31 +680,31 @@ module PE_tb;
 	`endif
 	logic ipsum_undone;
 	logic receiving_ipsum;
-	
+
 	always_comb begin
 		`ifdef tb0
-			if(counter%10 == 2) begin 
+			if(counter%10 == 2) begin
 				receiving_ipsum = 1;
-		`elsif tb1 
-			if(counter%10 == 1 || counter%10 == 3 || counter%10 == 5 || counter%10 == 7 || counter%10 == 9) begin 
+		`elsif tb1
+			if(counter%10 == 1 || counter%10 == 3 || counter%10 == 5 || counter%10 == 7 || counter%10 == 9) begin
 				receiving_ipsum = 1;
 		`elsif tb2
-			if(counter%10 == 7) begin 
+			if(counter%10 == 7) begin
 				receiving_ipsum = 1;
-		`else 
-			if(counter%10 == 4) begin 
+		`else
+			if(counter%10 == 4) begin
 				receiving_ipsum = 1;
 		`endif
 		end else begin
 			receiving_ipsum = 0;
 		end
-		
+
 		ipsum_undone = rst || set_info || start || receiving_ipsum;
 		ipsum_enable = (ipsum_ready && !ipsum_undone && !ip_done);
-	end 
-	
+	end
+
 	always_ff@(posedge rst or posedge clk) begin
-		if(rst) begin		
+		if(rst) begin
 			ipsum_ptr2 <= 10'd0;
 			ipsum_ptr1 <= 10'd0;
 			ipsum_ptr0 <= 10'd1;
@@ -724,7 +724,7 @@ module PE_tb;
 				$display("*Input Psum Distribution Info* Time:%20d, Enable:%d, Ipsum Buffer is preparing for[0][0][0]"
 							,$time,ipsum_enable);
 			`endif
-			
+
 		end else begin
 			if(ipsum_ready && !ipsum_undone) begin
 				`ifdef tb3 // hybrid
@@ -751,8 +751,8 @@ module PE_tb;
 				end else begin
 					if(ipsum_ptr0 == (`ofmap_col-1)) begin
 						ipsum_ptr0 <= 10'd0;
-						if(ipsum_ptr1 == ip_delivery_kernel-1) begin 
-							`ifdef tb2 // batch_size 2 
+						if(ipsum_ptr1 == ip_delivery_kernel-1) begin
+							`ifdef tb2 // batch_size 2
 								ipsum_ptr2 <= ipsum_ptr2 + 10'd1;
 							`else
 								ipsum_ptr2 <= 10'd2;
@@ -761,12 +761,12 @@ module PE_tb;
 						end else begin
 							ipsum_ptr2 <= ipsum_ptr2;
 							ipsum_ptr1 <= ipsum_ptr1 + 10'd1;
-						end 
+						end
 					end else begin
 						ipsum_ptr2 <= ipsum_ptr2;
 						ipsum_ptr1 <= ipsum_ptr1;
 						ipsum_ptr0 <= ipsum_ptr0 + 10'd1;
-					end 
+					end
 					ip_done <= 1'd0;
 					`ifdef tb3 // hybrid
 						$display("*Ipsum* Time:%20d, ipsum:%7d%7d, next ipsum Buffer[%2d][%2d,%2d][%2d]",
@@ -776,15 +776,15 @@ module PE_tb;
 						$display("*Ipsum* Time:%20d, ipsum:%10d, next ipsum Buffer[%2d][%2d][%2d]"
 						,$time,$signed(ipsum),ipsum_ptr2,ipsum_ptr1,ipsum_ptr0);
 					`endif
-				end 
-	
+				end
+
 			// ipsum not ready
 			end	else begin
 				ip_done <= ip_done;
 				ipsum_ptr2 <= ipsum_ptr2;
 				ipsum_ptr1 <= ipsum_ptr1;
 				ipsum_ptr0 <= ipsum_ptr0;
-			end	
+			end
 		end
 	end
 
@@ -809,9 +809,9 @@ module PE_tb;
 	always_comb begin
 		opsum_undone = rst || set_info || start ;
 		opsum_ready = !opsum_undone;
-	end 
-	
-	assign result0 = opsum; 
+	end
+
+	assign result0 = opsum;
 	always_ff@(posedge rst or posedge clk) begin
 		if(rst) begin
 			op2 <= 8'd0;
@@ -833,7 +833,7 @@ module PE_tb;
 				`ifdef tb3 // hybrid
 					$display("\n Time:%20d: Counter %10d." ,$time,counter);
 					answer0 <= {opsum_MEM[op2][op1][2*op0+1][11:0],opsum_MEM[op2][op1][2*op0][11:0]};
-					if( result0 != answer0 || $isunknown(result0[23:12]) == 1'd1 
+					if( result0 != answer0 || $isunknown(result0[23:12]) == 1'd1
 										   || $isunknown(result0[11:0]) == 1'd1) begin
 						err <= err + 1;
 						$display("\n Time:%20d: Ofmap%3d channel%2d,%2d column%3d is \033[0;31m\ WRONG."
@@ -845,8 +845,8 @@ module PE_tb;
 						end else begin
 							$display("Channel%3d Correct ans %7d / Your ans %7d",
 							(op_ch*2+1),$signed(answer0[23:12]),$signed(result0[23:12]));
-						end 
-						
+						end
+
 						if($isunknown(result0[11:0]) == 1'd1) begin
 							$display("Channel%3d Correct ans %7d / Your ans Unknown",
 							(op_ch*2),$signed(answer0[11:0]));
@@ -854,14 +854,14 @@ module PE_tb;
 							$display("Channel%3d Correct ans %7d / Your ans %7d",
 							(op_ch*2),$signed(answer0[11:0]),$signed(result0[11:0]));
 						end
-						
+
 					end else begin
 						$display("%c[0;33m",27);
-						$display("\n Time:%20d: Ofmap%3d channel%2d,%2d column%3d : %7d%7d is correct." ,$time, 
+						$display("\n Time:%20d: Ofmap%3d channel%2d,%2d column%3d : %7d%7d is correct." ,$time,
 							op_batch, (op_ch*2+1), (op_ch*2), op_col,$signed(answer0[23:12]),$signed(answer0[11:0]));
 						$write("%c[0m",27);
 						err <= err;
-					end 
+					end
 				`else
 					answer0 <= opsum_MEM[op2][op1][op0];
 					$display("\n Time:%20d: Counter %10d." ,$time,counter);
@@ -869,7 +869,7 @@ module PE_tb;
 						err <= err + 1;
 						$display("\n Time:%20d, Ofmap%3d channel%3d column%3d is WRONG."
 							,$time, op_batch, op_ch, op_col);
-						$display("Correct ans %10d / Your ans Unknown",answer0); 
+						$display("Correct ans %10d / Your ans Unknown",answer0);
 					end else if($signed(result0) != $signed(answer0)) begin
 						err <= err + 1;
 						$display("\n Time:%20d, Ofmap%3d channel%3d column%3d is \033[0;31m\ WRONG."
@@ -882,12 +882,12 @@ module PE_tb;
 							,$time, op_batch, op_ch, op_col,$signed(answer0));
 						$write("%c[0m",27);
 						err <= err;
-					end 
+					end
 				`endif
-				
+
 				if(op0 == (`ofmap_col-1)) begin
-					op0 <= 6'd0; 
-					if(op1 == ans_kernel-1) begin 
+					op0 <= 6'd0;
+					if(op1 == ans_kernel-1) begin
 						op2 <= op2 + 6'd1;
 						op1 <= 6'd0;
 					end else begin
@@ -898,11 +898,11 @@ module PE_tb;
 					op0 <= op0 + 6'd1;
 					op1 <= op1;
 					op2 <= op2;
-				end 
-				
+				end
+
 				if(op_col == (`ofmap_col-1)) begin
-					op_col <= 6'd0; 
-					if(op_ch == ans_kernel-1) begin 
+					op_col <= 6'd0;
+					if(op_ch == ans_kernel-1) begin
 						op_batch <= op_batch + 6'd1;
 						op_ch <= 6'd0;
 					end else begin
@@ -914,7 +914,7 @@ module PE_tb;
 					op_ch <= op_ch;
 					op_batch <= op_batch;
 				end
-				
+
 			//opsum haven't arrived
 			end else begin
 				output_count <= output_count;
@@ -925,13 +925,13 @@ module PE_tb;
 				op_ch    <= op_ch;
 				op_col   <= op_col;
 				err <= err;
-			end 
-		end 
-	end 
-	
+			end
+		end
+	end
+
 	logic opsum_all_done;
 	longint total_cycle;
-	// total cycles you spend 
+	// total cycles you spend
 	always_ff@(posedge rst or posedge clk) begin
 		if(rst) begin
 			total_cycle <= 64'd0;
@@ -942,28 +942,28 @@ module PE_tb;
 		end else begin
 			total_cycle <= total_cycle;
 			opsum_all_done <= opsum_all_done;
-		end 
+		end
 	end
-			
+
 	initial begin
 		$fsdbDumpfile("PE.fsdb");
 		$fsdbDumpvars("+struct", "+mda", PE0);
-		$fsdbDumpMDA(2,PE0); 
-		
+		$fsdbDumpMDA(2,PE0);
+
 		#(`CYCLE*`MAX)
 			if(err > 0 || (output_count!=`ofmap_total))begin
 				$display("                          \n   ");
-				
+
 				if(output_count != `ofmap_total) begin
 					$display("	!Error! You only have only %8d sets of opsum \n", output_count);
 				end else begin
 					$display("          Totally has %10d errors \n", err);
 				end
-				
+
 				if(opsum_all_done) begin
 					$display("In %20d cycles, You have sent out all opsums.\n",total_cycle);
-				end 
-				
+				end
+
 				$display("****************************               Sad  GIRAFFE   ");
 				$display("****************************               __     *  	  ");
 				$display("**                        **               \\ \\____|___	 	  ");
@@ -990,10 +990,10 @@ module PE_tb;
 				$display("                                   |___|      |___|         ");
 				$display("                          \n   ");
 			end else begin
-				
+
 				$display("\n In %20d cycles, You have sent out all opsums.",total_cycle);
 				$display("%c[0;33m",27);
-			`ifdef tb0 
+			`ifdef tb0
 				$display("****************************              HAPPY  GIRAFFE   ");
 				$display("****************************                __     *  	   ");
 				$display("**                        **                \\ \\____|___	   ");
@@ -1019,7 +1019,7 @@ module PE_tb;
 				$display("                                    |___|      |___|        ");
 				$display("                                    |___|      |___|        ");
 				$display("                          \n   ");
-	
+
 			`elsif tb1
 
 				$display("                       ~~ Simulation PASS ~~                                  ");
@@ -1040,7 +1040,7 @@ module PE_tb;
 				$display("                  |_)  |                    |  (_|                            ");
 				$display("                  |   _|                    |    |                            ");
 				$display("   ___            |  (_|                    |_   |             ___         ");
-				$display("  \\  /            |    |                    |_)  |             \\  /         "); 
+				$display("  \\  /            |    |                    |_)  |             \\  /         ");
 				$display("   \\/\\     ______ |   _|                    |    |_______      /\\/             ");
 				$display("      \\   /          (_|         ♥ ~        |         |_| \\   /              ");
 				$display("       \\./_      __    |         ~ ♥        |    __        \\./                ");
@@ -1052,7 +1052,7 @@ module PE_tb;
 				$display("        |___|      |___|                    |___|       |___|                 ");
 				$display("        |___|      |___|                    |___|       |___|                 ");
 				$display("                          \n   ");
-			`else 
+			`else
 				`ifdef tb3
 					$display("%c[5;33m",27);
 				`endif
@@ -1073,7 +1073,7 @@ module PE_tb;
 				$display("                  |_)  |              |    ___/      |  (_|                            ");
 				$display("                  |   _|              |_  |          |    |                            ");
 				$display("   ___            |  (_|              |_) |          |_   |             ___         ");
-				$display("  \\  /            |    |              |_  |          |_)  |             \\  /         "); 
+				$display("  \\  /            |    |              |_  |          |_)  |             \\  /         ");
 				$display("   \\/\\     ______ |   _|              |_) |          |    |_______      /\\/             ");
 				$display("      \\   /          (_|              |   |          |         |_| \\   /              ");
 				$display("       \\./_      __    |   *     _____|  _|          |    __        \\./           ");
@@ -1089,8 +1089,8 @@ module PE_tb;
 				$write("%c[0m",27);
 				// Here comes HAPPY Giraffes
 			end
-		 
+
 		$finish;
 	end
-	
-endmodule 
+
+endmodule
